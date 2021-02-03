@@ -17,16 +17,20 @@
 - name: Create and sign the the new certificate 
   shell: openssl req -new -x509 -subj '/C={{ openldap_server_country }}/ST={{ openldap_server_state }}/L={{ openldap_server_location }}/O={{ openldap_server_organization }}/CN={{ ansible_hostname }}/' -days 3650 -key my.key -out cert.crt -extensions v3_ca chdir={{ openldap_server_app_path }}/certs/   creates={{ openldap_server_app_path }}/certs/cert.crt
 
+- name: check if systemd exists
+  stat:
+    path: /run/systemd/system
+  register: systemd_run_dir
+
 - name: copy the supporting files
   copy: src=ldap dest=/etc/sysconfig/ldap mode=0755
-  when: openldap_server_enable_ssl and ansible_os_family == 'RedHat'
+  when: openldap_server_enable_ssl and ansible_os_family == 'RedHat' and not systemd_run_dir.stat.exists
   notify: 
    - restart slapd
 
-
 - name: copy the supporting files
   copy: src=slapd_fedora dest=/etc/sysconfig/slapd mode=0755
-  when: openldap_server_enable_ssl and ansible_distribution == "Fedora"
+  when: openldap_server_enable_ssl and ansible_os_family == 'RedHat' and systemd_run_dir.stat.exists
   notify: 
    - restart slapd
 
