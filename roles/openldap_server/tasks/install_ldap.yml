@@ -39,3 +39,20 @@
 
 - name: Copy the ldap.conf configuration file
   template: src=ldap.conf.j2 dest={{ openldap_server_app_path }}/ldap.conf
+
+- name: allow inbound traffic to ldap tcp/389
+  firewalld:
+    port: 389/tcp
+    permanent: yes
+    immediate: yes
+    state: enabled
+  ignore_errors: yes
+
+- name: allow inbound traffic to ldaps tcp/636
+  firewalld:
+    port: 636/tcp
+    permanent: yes
+    immediate: yes
+    state: enabled
+  when: openldap_server_enable_ssl
+  ignore_errors: yes
