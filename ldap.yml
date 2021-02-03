@@ -14,8 +14,3 @@
   roles:
     - openldap_server
     - { role: lam, when: lam.enabled == True }
-
-  handlers:
-
-  - name: restart slapd
-    service: name=slapd state=restarted enabled=yes
